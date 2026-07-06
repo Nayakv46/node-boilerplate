@@ -4,10 +4,96 @@
 // Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model users {
+  id            String   @id @default(uuid()) @db.Uuid
+  email         String   @unique
+  password_hash String
+  first_name    String?
+  last_name     String?
+  is_admin      Boolean  @default(false)
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
+
+  organizations mm_users_organizations[]
+  roles         mm_organizations_users_roles[]
+
+  @@map("users")
+}
+
+//
+// TABLE: mm_users_organizations
+//
+model mm_users_organizations {
+  id              String   @id @default(uuid()) @db.Uuid
+  user_id         String   @db.Uuid
+  organization_id String   @db.Uuid
+  joined_at       DateTime @default(now())
+
+  user         users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  organization organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, organization_id])
+  @@index([user_id])
+  @@index([organization_id])
+  @@map("mm_users_organizations")
+}
+
+//
+// ROLES DICTIONARY
+//
+model roles {
+  id   Int       @id @default(autoincrement())
+  name role_name @unique
+
+  user_organizations mm_organizations_users_roles[]
+
+  @@map("roles")
+}
+
+//
+// ROLE ASSIGNMENT PER USER PER organization
+//
+model mm_organizations_users_roles {
+  id              String @id @default(uuid()) @db.Uuid
+  user_id         String @db.Uuid
+  organization_id String @db.Uuid
+  role_id         Int
+
+  assigned_at DateTime @default(now())
+
+  user         users         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  organization organizations @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  role         roles         @relation(fields: [role_id], references: [id])
+
+  @@unique([user_id, organization_id, role_id])
+  @@index([user_id])
+  @@index([organization_id])
+  @@map("mm_organizations_users_roles")
+}
+
+model organizations {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  description String?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
+
+  users mm_users_organizations[]
+  roles mm_organizations_users_roles[]
+
+  @@map("organizations")
+}
+
+enum role_name {
+  owner
+  editor
+  viewer
 }
