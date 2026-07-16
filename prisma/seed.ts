@@ -8,4 +8,4 @@ async function main() {
 
 main()
   .catch(console.error)
-  .finally(() => process.exit(1));
+  .finally(() => process.exit(0));
