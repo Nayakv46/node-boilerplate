@@ -4,7 +4,7 @@ import { hashPassword } from "../../src/utils/passwordHashing";
 const prisma = new PrismaClient();
 
 // Creates an admin user if it doesn't already exist
-async function main() {
+export async function main() {
   const email = "admin@example.com";
 
   const existingUser = await prisma.users.findUnique({

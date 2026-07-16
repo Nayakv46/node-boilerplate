@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 const roles = ["owner", "editor", "viewer"];
 
 // Creates roles if they don't already exist
-async function main() {
+export async function main() {
   const existingRoles = await prisma.roles.findMany();
 
   for (const roleName of roles) {
