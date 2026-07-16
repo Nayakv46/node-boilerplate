@@ -1,5 +1,5 @@
-import { main as seedUser } from "./usersSeed";
-import { main as seedRoles } from "./rolesSeed";
+import { main as seedUser } from "./seeds/usersSeed";
+import { main as seedRoles } from "./seeds/rolesSeed";
 
 async function main() {
   await seedUser();
